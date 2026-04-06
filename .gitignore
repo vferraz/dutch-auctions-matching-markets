@@ -1,0 +1,17 @@
+# Lean
+**/.lake/
+
+# Python
+**/__pycache__/
+*.pyc
+.venv/
+.venv_story/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# System
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
