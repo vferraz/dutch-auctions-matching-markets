@@ -1,29 +1,71 @@
 # Dutch Auctions in Matching Markets with Waiting Costs
 
-**Pitz & Ferraz (2026)**
+Code and Lean formalization for the project by Thomas Pitz and Vinicius Ferraz.
 
-This repository contains the code and formal verification materials for "Dutch Auctions in Matching Markets with Waiting Costs."
+## Overview
 
-## Structure
+This repository contains two public components of the project:
 
-### `lean4/`
+- `code/`: numerical code, simulation outputs, and quantitative paper figures
+- `lean4/`: Lean 4 formalization of the paper's theoretical results
 
-Canonical Lean 4 formalization of the paper's theoretical results, built against Mathlib.
+The repository is organized as a compact public companion for the project rather than a full private research workspace.
 
-**Status:** All theorems are fully verified except for `two_sided_equilibrium_existence` in `TwoSidedEntry.lean`, which contains one remaining `sorry`. This proof requires a Brouwer fixed-point theorem that is not yet available in current Mathlib.
+## Repository Structure
 
 ### `code/`
 
-Public replication materials:
+`code/` contains the numerical and figure-generation side of the project.
 
-- `lib.py` — shared library of model primitives and numerical routines
-- `script_figures_quant.py` — generates the three story figures used in the paper
-- `paper_figures/` — the shipped PNG figures (story figures 1--3)
-- `sims/` — simulation runs:
-  - `baseline_controlled_thickness/` — baseline simulation with controlled market thickness
-  - `controlled_thickness_variants/` — parameter variants
-  - `controlled_thickness_variants_v2_cli/` — CLI-based variant runs
+- `lib.py`
+  Core model primitives and numerical routines used across the codebase.
+- `script_figures_quant.py`
+  Main script for generating the quantitative story figures.
+- `paper_figures/`
+  Exported figure files currently used in the paper.
+- `sims/baseline_controlled_thickness/`
+  Baseline controlled-thickness simulation and outputs.
+- `sims/controlled_thickness_variants/`
+  Controlled-thickness parameter variants and archived outputs.
+- `sims/controlled_thickness_variants_v2_cli/`
+  CLI-based variant runs and associated outputs.
 
-## Note
+### `lean4/`
 
-The paper source (LaTeX) is not included in this repository.
+`lean4/` is the canonical Lean 4 formalization for the project.
+
+- `DutchAuction/`
+  Main Lean source files.
+- `lakefile.lean`, `lake-manifest.json`, `lean-toolchain`
+  Lean/Lake project configuration.
+- `ARISTOTLE_SUMMARY_*.md`
+  Record of the automated proof-filling pass.
+
+Current status:
+
+- the formalization builds successfully with `lake build`
+- one theorem remains incomplete:
+  - `DutchAuction/TwoSidedEntry.lean`
+  - `two_sided_equilibrium_existence`
+- this remaining gap is tied to Brouwer-style fixed-point support in the current Mathlib stack
+
+## Quick Start
+
+### Generate the quantitative figures
+
+```bash
+cd code
+python3 script_figures_quant.py
+```
+
+### Build the Lean formalization
+
+```bash
+cd lean4
+lake build
+```
+
+## Notes
+
+- The three PNGs in `code/paper_figures/` are the current exported story figures.
+- The Lean directory is the current best verified version of the formalization.
