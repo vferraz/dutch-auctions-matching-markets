@@ -300,21 +300,25 @@ theorem batch_rider_cutoff
 
 /-
 Proposition 4(b) (Dutch attracts more riders than batch, `prop:rider-micro`):
-    Under acceptance-rate matching (q^R_DA = q^R_FPb) and τ^R_DA < T = τ^R_FPb,
-    the rider entry cutoff satisfies v̄_DA < v̄_FPb, so Dutch attracts
-    strictly more riders than batch clearing for any κ > 0.
+    Under acceptance-rate matching (q^R_DA = q^R_FPb) and τ^R_DA < τ^R_FPb,
+    Dutch attracts strictly more riders than batch clearing whenever the
+    timing advantage dominates the price disadvantage (κ > κ₀), i.e.,
+    (p̄_DA − p̄_FPb) · q^R < κ · (τ^R_FPb − τ^R_DA).
+    This is a conditional result: the dominance condition is required
+    because p̄_DA may exceed p̄_FPb, so a sufficiently large κ is needed
+    for the timing benefit to outweigh the price disadvantage.
 -/
 theorem rider_batch_dominance
     (DA FPb : Mechanism) (kap : ℝ) (D R : ℝ)
-    (hkap : kap > 0)
     (hqR_eq : qR DA D R = qR FPb D R)
     (hqR_pos : qR DA D R > 0)
     (htauR_strict : DA.tauR D R < FPb.tauR D R)
-    (hpbar : DA.pbar D R ≤ FPb.pbar D R) :
+    (hdom : (DA.pbar D R - FPb.pbar D R) * qR DA D R <
+            kap * (FPb.tauR D R - DA.tauR D R)) :
     v_bar DA kap D R < v_bar FPb kap D R := by
   unfold v_bar;
-  field_simp;
-  rw [ ← hqR_eq ] ; nlinarith [ mul_lt_mul_of_pos_left htauR_strict hkap, mul_div_cancel₀ ( kap * FPb.tauR D R ) ( ne_of_gt hqR_pos ) ]
+  rw [ ← hqR_eq, add_div', add_div' ] <;> try linarith;
+  rw [ div_lt_div_iff_of_pos_right ] <;> linarith
 
 /-
 Proposition 4(c) Case 2 (κ* threshold, `prop:rider-micro`, `eq:kappa-star`):
