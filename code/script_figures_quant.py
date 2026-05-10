@@ -176,7 +176,7 @@ def make_figure1():
 # ══════════════════════════════════════════════════════════════════════
 
 def make_figure2_quant():
-    fig = plt.figure(figsize=(6.5, 1.75))
+    fig = plt.figure(figsize=(6.5, 1.49))
     gs = GridSpec(1, 2, figure=fig, wspace=0.42)
 
     lam, R = p["lam"], p["R"]
@@ -205,7 +205,7 @@ def make_figure2_quant():
     ax_a.set_ylabel(r"$\Phi_M(D)$")
     ax_a.set_xlim(0, p["D_bar"])
     ax_a.set_ylim(0, p["D_bar"])
-    ax_a.legend(loc="upper right", frameon=False, handlelength=1.4)
+    ax_a.legend(loc="lower right", frameon=False, handlelength=1.4)
 
     # ── B. Two-sided closure ────────────────────────────────────
     ax_b = fig.add_subplot(gs[0, 1])
@@ -259,7 +259,7 @@ def make_figure2_quant():
 # ══════════════════════════════════════════════════════════════════════
 
 def make_figure3():
-    fig = plt.figure(figsize=(6.5, 1.55))
+    fig = plt.figure(figsize=(6.5, 1.40))
     gs = GridSpec(1, 3, figure=fig, wspace=0.55)
 
     rho_vals = np.linspace(0.35, 0.95, 80)
