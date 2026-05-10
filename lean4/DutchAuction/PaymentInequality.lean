@@ -277,6 +277,67 @@ theorem welfare_vs_batch_invariant_under_payment_correction
       FPb.m D R * s - lam * D * FPb.tau D R - kap * R * FPb.tauR D R := by
   nlinarith [ mul_pos hlam hD, mul_pos hkap hR ]
 
+/-
+Algebraic helper for the G3 conditional structure.
+
+A trade-weighted average over a partition `[0, t*] ∪ (t*, T]` with mass
+fractions `θ ∈ [0, 1]` and `(1 − θ)` is at least `θ · p̄` whenever the
+pre-`t*` component price `p_pre` exceeds `p̄` and the post-`t*` component
+price `p_post` is nonneg.
+
+This is the structural content of v1 OA.6's "front-loading" argument: under
+ARM, IF most trade mass concentrates at `t ≤ t*` where `p^DA(t) ≥ p̄`, then
+the trade-weighted price is bounded below by `θ · p̄`. Combined with
+`q_DA = q_FPb` (ARM), this gives `π_DA ≥ θ · π_FPb`, with `π_DA ≥ π_FPb`
+iff `θ = 1` OR the post-`t*` average price compensates.
+
+Numerical verification (`private_workspace/misc/verify_g2_g3_baselines.md`):
+`θ_pre ≈ 0.97` at the v1 baseline (T=30, ρ=0.7), `θ_pre ≈ 0.44` at the
+short-T stress row (T=1, ρ=0.7, η·T=0.5) — and the latter row is exactly
+where G3 fails.
+-/
+theorem trade_weighted_price_ge_threshold
+    (theta pbar p_pre p_post : ℝ)
+    (htheta_nn : 0 ≤ theta) (htheta_le : theta ≤ 1)
+    (hpre  : p_pre  ≥ pbar)
+    (hpost : 0 ≤ p_post)
+    (hpbar : 0 ≤ pbar) :
+    theta * p_pre + (1 - theta) * p_post ≥ theta * pbar := by
+  nlinarith [htheta_nn, htheta_le, hpre, hpost, hpbar]
+
+/-
+Conditional payment inequality from the trade-weighted-average diagnostic.
+
+Replaces the v1 tautology `front_loading_payment_inequality` with a
+CONDITIONAL theorem whose hypothesis `h_avg_ge` is directly verifiable
+from numerical computation of the trade-weighted DA price. The hypothesis
+`DA.pi D R ≥ (1 - alpha) * pbar` is the SUBSTANTIVE content that v1 OA.6's
+front-loading argument established only verbally; we do not derive it from
+Poisson primitives in Lean (that would require integration formalism
+estimated at ~1 week — see `private_workspace/misc/verify_g2_g3_baselines.md`
+and the planning artefact at `~/.claude/plans/lean-close-curious-wilkinson.md`).
+
+Strategic note: this is NOT a primitive proof of `π_DA ≥ π_FPb`. It is a
+conditional theorem making the substantive dependency explicit — the
+"trade-weighted average DA price exceeds `p̄`" diagnostic is what was
+implicit in the v1 tautology, now named as a hypothesis. Per
+`STRATEGIC_OPTIONS.md`, the unconditional gate G3 closure is not feasible
+within the project's effort budget. This conditional form is the honest
+replacement: callers must supply `h_avg_ge` with explicit applicability
+conditions (numerically verified at baselines, FAILS in short-T stress).
+-/
+theorem pi_DA_ge_pi_FPb_under_premium_average
+    (DA FPb : Mechanism) (D R alpha pbar : ℝ)
+    (hα     : alpha < 1)
+    (hpbar  : 0 ≤ pbar)
+    -- Closed form for FPb's payment: π_FPb = (1 − α) · p̄.
+    (hFPb_eq : FPb.pi D R = (1 - alpha) * pbar)
+    -- Substantive diagnostic: trade-weighted DA price ≥ p̄ (after commission).
+    -- Numerically true at baseline; FAILS in stress row (k) with η·T = 0.5.
+    (h_avg_ge : DA.pi D R ≥ (1 - alpha) * pbar) :
+    DA.pi D R ≥ FPb.pi D R := by
+  rw [hFPb_eq]; exact h_avg_ge
+
 end PaymentInequality
 
 end

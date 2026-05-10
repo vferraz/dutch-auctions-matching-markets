@@ -159,6 +159,91 @@ theorem batch_timing_gap
     FPb.tau D R - DA.tau D R > 0 := by
   linarith
 
+/-
+Negative-result theorem for Gate G2 in `STRATEGIC_OPTIONS.md`.
+
+Under the acceptance-rate-matching (ARM) condition, the cumulative DA hazard
+`H^DA(t) = μ_D · ∫₀^t F̄_V(p^DA(s)) ds` is convex on `[0, T]` (because
+`h^DA(t) = μ_D · F̄_V(p^DA(t))` is increasing in `t` when `p^DA(t) = p_0 e^{-δt}`
+is decreasing and `F̄_V` is decreasing). ARM forces `H^DA(0) = 0` and
+`H^DA(T) = η · T` where `η = μ_D · F̄_V(p̄)` is the FPi hazard rate.
+The chord-bound for convex functions on `[0,T]` then gives `H^DA(t) ≤ η·t`
+pointwise on `[0,T]`, hence `S^DA(t) = exp(-H^DA t) ≥ exp(-η·t)` pointwise,
+and integrating yields
+
+    τ_DA = ∫₀^T S^DA(t) dt  ≥  ∫₀^T exp(-η·t) dt = τ_FPi.
+
+This shows that the GATE G2 INEQUALITY (`τ_DA ≤ τ_FPi`) FAILS UNDER ARM:
+Dutch is generically slower than fixed-price-immediate when acceptance rates
+are matched. Verified numerically against v1 OA Table OA.1 in
+`private_workspace/misc/verify_g2_g3_baselines.md`: 7 of 10 baselines are
+Case 4 (Dutch slower), with `Δτ < 0` ranging from -3.0 to -0.5 minutes.
+
+Strategic implication: `STRATEGIC_OPTIONS.md` Decision A (promoting OA.7 /
+Prop 12c to a primitive theorem with an unconditional `τ_DA ≤ τ_FPi`
+hypothesis) is not viable in its current form. The honest reframe is a
+bidirectional four-case theorem: Cases 1, 2, 4 give DA dominance under
+named conditions; Case 3 gives FP dominance under named conditions.
+
+The theorem below is the abstract version of the negative result. It
+proves the integral comparison for any convex hazard `H` with the ARM
+endpoint condition `H(T) = η·T`, without committing to a specific
+`PoissonPrimitives` structure (full integration formalism for the
+Poisson-specialization is out of scope for this work item).
+-/
+theorem tau_ge_under_convex_hazard
+    (T η : ℝ) (H : ℝ → ℝ)
+    (hT : 0 < T)
+    (hη : 0 ≤ η)
+    (hH0 : H 0 = 0)
+    (hHT : H T = η * T)
+    (hH_conv : ConvexOn ℝ (Set.Icc 0 T) H)
+    (hH_cont : ContinuousOn H (Set.Icc 0 T)) :
+    ∫ t in (0:ℝ)..T, Real.exp (-(η * t))
+      ≤ ∫ t in (0:ℝ)..T, Real.exp (-(H t)) := by
+  -- Step 1: chord bound `H t ≤ η * t` for all `t ∈ [0, T]`.
+  have hchord : ∀ t ∈ Set.Icc (0:ℝ) T, H t ≤ η * t := by
+    intro t ht
+    obtain ⟨ht0, htT⟩ := ht
+    -- Set b = t / T and a = 1 - b.
+    set b : ℝ := t / T with hb_def
+    have hb_nn : (0:ℝ) ≤ b := div_nonneg ht0 hT.le
+    have hb_le : b ≤ 1 := (div_le_one hT).mpr htT
+    set a : ℝ := 1 - b with ha_def
+    have ha_nn : (0:ℝ) ≤ a := by rw [ha_def]; linarith
+    have hab : a + b = 1 := by rw [ha_def]; ring
+    have h0_mem : (0:ℝ) ∈ Set.Icc (0:ℝ) T := ⟨le_refl 0, hT.le⟩
+    have hT_mem : T ∈ Set.Icc (0:ℝ) T := ⟨hT.le, le_refl T⟩
+    have hconv := hH_conv.2 h0_mem hT_mem ha_nn hb_nn hab
+    -- `hconv : H (a • 0 + b • T) ≤ a • H 0 + b • H T`
+    -- For ℝ, `•` is `*`.
+    simp only [smul_eq_mul] at hconv
+    rw [hH0, hHT] at hconv
+    -- `hconv : H (a * 0 + b * T) ≤ a * 0 + b * (η * T)`
+    have hT_ne : T ≠ 0 := ne_of_gt hT
+    have heq_arg : a * 0 + b * T = t := by
+      simp only [ha_def, hb_def]; field_simp; ring
+    have heq_rhs : a * 0 + b * (η * T) = η * t := by
+      simp only [ha_def, hb_def]; field_simp; ring
+    rw [heq_arg, heq_rhs] at hconv
+    exact hconv
+  -- Step 2: pointwise `exp(-η·t) ≤ exp(-H t)` on `[0, T]`.
+  have hpw : ∀ t ∈ Set.Icc (0:ℝ) T, Real.exp (-(η * t)) ≤ Real.exp (-(H t)) := by
+    intro t ht
+    have hch := hchord t ht
+    apply Real.exp_le_exp.mpr
+    linarith
+  -- Step 3: integrability of both sides on `[0, T]`.
+  have h_int_lin :
+      IntervalIntegrable (fun t => Real.exp (-(η * t))) MeasureTheory.volume 0 T :=
+    (Real.continuous_exp.comp ((continuous_const.mul continuous_id).neg)).intervalIntegrable 0 T
+  have h_int_H :
+      IntervalIntegrable (fun t => Real.exp (-(H t))) MeasureTheory.volume 0 T := by
+    apply ContinuousOn.intervalIntegrable_of_Icc hT.le
+    exact Real.continuous_exp.comp_continuousOn hH_cont.neg
+  -- Step 4: conclude by interval integral monotonicity.
+  exact intervalIntegral.integral_mono_on hT.le h_int_lin h_int_H hpw
+
 end Microfoundation
 
 end

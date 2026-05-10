@@ -83,6 +83,47 @@ theorem driver_attractiveness_decomposition
   unfold c_bar; constructor <;> intro h <;> linarith;
 
 /-
+Proposition OA.7 Case 2 (λ* threshold, `prop:DA-vs-imm`, driver side):
+    When A_d < 0 and B_d > 0 (genuine tradeoff: FPi has higher expected
+    earnings q·π but DA has timing advantage), A_d + λ·B_d ≥ 0 iff
+    λ ≥ −A_d/B_d =: λ*. Here A_d := q_DA π_DA − q_FP π_FP and
+    B_d := τ_FP − τ_DA per `driver_attractiveness_decomposition`.
+    Driver-side analogue of `TwoSidedEntry.rider_kappa_threshold`.
+-/
+theorem driver_lambda_threshold
+    (A B lam : ℝ)
+    (hA_neg : A < 0) (hB_pos : B > 0) :
+    A + lam * B ≥ 0 ↔ lam ≥ -A / B := by
+  constructor <;> intro <;> nlinarith [ mul_div_cancel₀ ( -A ) hB_pos.ne' ]
+
+/-
+Proposition OA.7 Cases 1, 3, 4 (driver dominance classification, `prop:DA-vs-imm`):
+    Case 1: A_d ≥ 0, B_d ≥ 0 → A_d + λ·B_d ≥ 0 for all λ ≥ 0 (DA dominates
+            both on earnings and on timing).
+    Case 3: A_d < 0, B_d ≤ 0 → A_d + λ·B_d < 0 for all λ ≥ 0 (FPi dominates;
+            no λ rescues DA).
+    Case 4: A_d ≥ 0, B_d < 0 → A_d + λ·B_d ≥ 0 iff λ ≤ A_d / |B_d| =: λ**
+            (reversed tradeoff: DA has earnings edge, FPi has timing edge;
+            DA dominates only when waiting cost is small enough).
+    Driver-side analogues of `TwoSidedEntry.rider_dominance_case1`,
+    `rider_dominance_case3`, `rider_dominance_case4`.
+-/
+theorem driver_dominance_case1
+    (A B lam : ℝ) (hA : A ≥ 0) (hB : B ≥ 0) (hlam : lam ≥ 0) :
+    A + lam * B ≥ 0 := by
+  positivity
+
+theorem driver_dominance_case3
+    (A B lam : ℝ) (hA_neg : A < 0) (hB_nonpos : B ≤ 0) (hlam : lam ≥ 0) :
+    A + lam * B < 0 := by
+  nlinarith
+
+theorem driver_dominance_case4
+    (A B lam : ℝ) (hA : A ≥ 0) (hB_neg : B < 0) :
+    A + lam * B ≥ 0 ↔ lam ≤ A / (-B) := by
+  constructor <;> intros <;> nlinarith [ mul_div_cancel₀ A ( by linarith : ( -B ) ≠ 0 ) ]
+
+/-
 PROBLEM
 Theorem 1 (Dutch entry dominance, `thm:entry`):
     Under continuity, congestion monotonicity, and Dutch dominance
