@@ -1,5 +1,15 @@
 # Lean
+.lake/
 **/.lake/
+
+# LaTeX build artefacts
+texput.log
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.synctex.gz
 
 # Python
 **/__pycache__/
@@ -15,3 +25,6 @@
 Thumbs.db
 *.swp
 *.swo
+
+# Backup files
+*.bak
