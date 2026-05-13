@@ -85,7 +85,7 @@ def make_figure1():
     pDA = p["rho"] * np.exp(-p["delta"] * t)
     ax_a.plot(t, pDA, color=C_DA, label="DA")
     ax_a.axhline(p["p_bar"], color=C_FPi, ls="--", lw=0.9,
-                 label=r"FP$^{\rm imm}$")
+                 label=r"PP$^{\rm imm}$")
 
     ax_a.set_xlabel(r"Time $t$ (min)")
     ax_a.set_ylabel(r"Price")
@@ -104,7 +104,7 @@ def make_figure1():
 
     ax_b.plot(t, cum_DA, color=C_DA, label="DA")
     ax_b.plot(t, cum_FPi, color=C_FPi, ls="--",
-              label=r"FP$^{\rm imm}$")
+              label=r"PP$^{\rm imm}$")
     ax_b.set_xlabel(r"Time $t$ (min)")
     ax_b.set_ylabel(r"Match probability")
     ax_b.set_xlim(0, T)
@@ -161,7 +161,7 @@ def make_figure1():
                   ha="left", va="bottom")
 
     ax_c.set_xlabel(r"Driver waiting cost $\lambda$")
-    ax_c.set_ylabel(r"$\bar c_{\rm DA} - \bar c_{\rm FP}$")
+    ax_c.set_ylabel(r"$\bar c_{\rm DA} - \bar c_{\rm PP^{\rm imm}}$")
     ax_c.set_xlim(0, 0.15)
     ax_c.legend(loc="lower left", frameon=False, handlelength=1.6)
 
@@ -194,7 +194,7 @@ def make_figure2_quant():
     ax_a.plot(D_range, D_range, color=C_GR, lw=0.45)
     ax_a.plot(D_range, phi_DA,  color=C_DA, label="DA")
     ax_a.plot(D_range, phi_FPi, color=C_FPi, ls="--",
-              label=r"FP$^{\rm imm}$")
+              label=r"PP$^{\rm imm}$")
 
     Ds_DA  = lib.solve_entry("DA",  R, lam, p["D_bar"], p["c_max"], p)
     Ds_FPi = lib.solve_entry("FPi", R, lam, p["D_bar"], p["c_max"], p)
@@ -235,9 +235,10 @@ def make_figure2_quant():
     ax_b.plot(D_resp_da, R_grid, color=C_DA, lw=1.0, label="DA driver")
     ax_b.plot(D_grid_r, R_resp_da, color=C_DA, ls="--", lw=0.9,
               label="DA rider")
-    ax_b.plot(D_resp_fp, R_grid, color=C_FPi, lw=1.0, label="FPi driver")
+    ax_b.plot(D_resp_fp, R_grid, color=C_FPi, lw=1.0,
+              label=r"PP$^{\rm imm}$ driver")
     ax_b.plot(D_grid_r, R_resp_fp, color=C_FPi, ls="--", lw=0.9,
-              label="FPi rider")
+              label=r"PP$^{\rm imm}$ rider")
     ax_b.plot(sol_da[0], sol_da[1], "o", color=C_DA, ms=3.5, zorder=5)
     ax_b.plot(sol_fp[0], sol_fp[1], "o", color=C_FPi, ms=3.5, zorder=5)
 
@@ -291,9 +292,9 @@ def make_figure3():
         r"C. Welfare difference",
     ]
     ylabels = [
-        r"$D^*_{\rm DA} - D^*_{\rm FP}$",
-        r"$\mathrm{Rev}_{\rm DA}/\mathrm{Rev}_{\rm FP}$",
-        r"$W_{\rm DA} - W_{\rm FP}$",
+        r"$D^*_{\rm DA} - D^*_{\rm PP^{\rm imm}}$",
+        r"$\mathrm{Rev}_{\rm DA}/\mathrm{Rev}_{\rm PP^{\rm imm}}$",
+        r"$W_{\rm DA} - W_{\rm PP^{\rm imm}}$",
     ]
     ydata_list = [entry_adv, rev_ratio, welfare_diff]
     refs = [0, 1, 0]

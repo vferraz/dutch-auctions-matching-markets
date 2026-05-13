@@ -26,7 +26,7 @@ Corollaries 2–4.
 -/
 
 -- ============================================================
--- Definitions (self-contained for Aristotle)
+-- Definitions (self-contained)
 -- ============================================================
 
 structure Mechanism where
@@ -61,15 +61,9 @@ def Rev (M : Mechanism) (alpha D R : ℝ) : ℝ :=
 
 namespace TwoSidedEntry
 
-/-
-PROBLEM
-Lemma 3 (Rider-attractiveness dominance, `lem:rider-dominance`):
+/-- Lemma 3 (Rider-attractiveness dominance, `lem:rider-dominance`):
     Dutch attracts weakly more riders at fixed thickness iff
-    (p̄_FP - p̄_DA) + κ[τ^R_FP/q^R_FP - τ^R_DA/q^R_DA] ≥ 0.
-
-PROVIDED SOLUTION
-Unfold v_bar and qR. The inequality v_bar DA ≤ v_bar FP expands to pbar_DA + κ·τR_DA/qR_DA ≤ pbar_FP + κ·τR_FP/qR_FP. Rearranging: (pbar_FP - pbar_DA) + κ·(τR_FP/qR_FP - τR_DA/qR_DA) ≥ 0. This is direct by constructor <;> intro h <;> linarith or simp [v_bar, qR] and linarith.
--/
+    `(p̄_FP − p̄_DA) + κ · [τ^R_FP/q^R_FP − τ^R_DA/q^R_DA] ≥ 0`. -/
 theorem rider_attractiveness_decomposition
     (DA FP : Mechanism) (kap : ℝ) (D R : ℝ) :
     v_bar DA kap D R ≤ v_bar FP kap D R ↔
@@ -78,15 +72,10 @@ theorem rider_attractiveness_decomposition
   unfold v_bar;
   grind
 
-/-
-PROBLEM
-Lemma 4 (Monotonicity of the two-sided entry map, `lem:two-sided-monotone`):
-    Under congestion, rider congestion, and cross-side complementarity
-    (with D̄ ≥ 0, R̄ ≥ 0), the four-part monotonicity structure holds.
-
-PROVIDED SOLUTION
-Split into 4 conjuncts using mul_le_mul_of_nonneg_left.
--/
+/-- Lemma 4 (Monotonicity of the two-sided entry map, `lem:two-sided-monotone`):
+    Under driver-side congestion, rider-side congestion, and cross-side
+    complementarity (with `D̄ ≥ 0`, `R̄ ≥ 0`), the four-part monotonicity
+    structure of `(Φ_D, Φ_R)` holds. -/
 theorem two_sided_entry_map_monotonicity
     (M : Mechanism) (lam kap D_bar R_bar : ℝ) (F_C F_V_bar : ℝ → ℝ)
     (hF_C_mono : Monotone F_C)
@@ -111,17 +100,12 @@ theorem two_sided_entry_map_monotonicity
   · exact mul_le_mul_of_nonneg_left ( hF_V_bar_anti ( hcong_R _ _ _ h ) ) hR_bar_nonneg;
   · exact mul_le_mul_of_nonneg_left ( hF_V_bar_anti ( hcross_ii _ _ _ h ) ) hR_bar_nonneg
 
-/-
-PROBLEM
-Theorem 2 (Two-sided Dutch entry dominance, `thm:two-sided-entry`):
-    The DA equilibrium is the greatest fixed point of Φ_DA (Topkis).
-    Any sub-fixed-point of Φ_DA is dominated by the DA equilibrium.
-    Since Φ_DA ≥ Φ_FP (outward shift), the FP equilibrium is a
-    sub-fixed-point, hence D*_DA ≥ D*_FP and R*_DA ≥ R*_FP.
-
-PROVIDED SOLUTION
-Apply hgreatest_DA to (D*_FP, R*_FP) using the outward shift and FP fixed-point equations.
--/
+/-- Conditional two-sided order-comparison lemma supporting the amplification
+    argument. If the DA entry map is pointwise above the benchmark map and the
+    selected DA equilibrium dominates every sub-fixed-point of `Φ_DA`, then the
+    DA equilibrium componentwise dominates the benchmark equilibrium. This is
+    an order-theoretic support lemma, not a formalization of the differentiable
+    M-matrix homotopy proof used for the current main-text Theorem 8. -/
 theorem two_sided_dutch_entry_dominance
     (DA FP : Mechanism) (lam kap D_bar R_bar : ℝ)
     (F_C F_V_bar : ℝ → ℝ)
@@ -147,15 +131,10 @@ theorem two_sided_dutch_entry_dominance
     D_star_DA ≥ D_star_FP ∧ R_star_DA ≥ R_star_FP := by
   exact hgreatest_DA _ _ ( by linarith [ hshift_D D_star_FP R_star_FP ] ) ( by linarith [ hshift_R D_star_FP R_star_FP ] ) |> fun h => ⟨ h.1, h.2 ⟩
 
-/-
-PROBLEM
-Corollary 2 (Driver-side dominance propagates to riders, `cor:propagation`):
+/-- Corollary 2 (Driver-side dominance propagates to riders, `cor:propagation`):
     With fixed-point equations, rider-side congestion monotonicity, and
-    cross-side outward shift, driver-side entry dominance propagates to riders.
-
-PROVIDED SOLUTION
-By contradiction using the one-sided contraction argument on the rider-side entry map.
--/
+    cross-side outward shift, driver-side entry dominance propagates to
+    riders. -/
 theorem driver_dominance_propagates
     (DA FP : Mechanism) (kap R_bar : ℝ) (F_V_bar : ℝ → ℝ)
     (D_star_DA R_star_DA D_star_FP R_star_FP : ℝ)
@@ -182,16 +161,10 @@ theorem driver_dominance_propagates
   by_contra h_contra;
   linarith [ hshift_R R_star_FP, hdecr_DA _ _ ( le_of_not_ge h_contra ), hdecr_FP _ _ ( le_of_not_ge h_contra ) ]
 
-/-
-PROBLEM
-Corollary 3 (Two-sided volume dominance, `cor:two-sided-volume`):
-    Under Theorem 2 conditions + volume increasing in both D and R
-    + fixed-thickness volume dominance,
-    m_DA(D*_DA, R*_DA) ≥ m_FP(D*_FP, R*_FP).
-
-PROVIDED SOLUTION
-Chain: FP.m D*_FP R*_FP ≤ DA.m D*_FP R*_FP (by hvol_dom) ≤ DA.m D*_DA R*_FP (by hvol_mono_D since D*_FP ≤ D*_DA) ≤ DA.m D*_DA R*_DA (by hvol_mono_R since R*_FP ≤ R*_DA). Use calc or linarith with these three facts.
--/
+/-- Corollary 3 (Two-sided volume dominance, `cor:two-sided-volume`):
+    Under the conditions of Theorem 2 together with volume monotonicity in
+    both `D` and `R` and fixed-thickness volume dominance,
+    `m_DA(D*_DA, R*_DA) ≥ m_FP(D*_FP, R*_FP)`. -/
 theorem two_sided_volume_dominance
     (DA FP : Mechanism)
     (D_star_DA R_star_DA D_star_FP R_star_FP : ℝ)
@@ -206,15 +179,9 @@ theorem two_sided_volume_dominance
     DA.m D_star_DA R_star_DA ≥ FP.m D_star_FP R_star_FP := by
   exact le_trans ( hvol_dom _ _ ) ( le_trans ( hvol_mono_R _ _ _ hentry_R ) ( hvol_mono_D _ _ _ hentry_D ) )
 
-/-
-PROBLEM
-Corollary 4 (Two-sided revenue comparison, `cor:two-sided-revenue`):
+/-- Corollary 4 (Two-sided revenue comparison, `cor:two-sided-revenue`):
     Dutch yields weakly higher revenue whenever
-    m_DA/m_FP ≥ p̄_FP/p̄_DA.
-
-PROVIDED SOLUTION
-Unfold Rev. Rev DA = α · m_DA · p̄_DA and Rev FP = α · m_FP · p̄_FP. Since α > 0, it suffices to show m_DA · p̄_DA ≥ m_FP · p̄_FP, which is exactly hvol. Use mul_le_mul_of_nonneg_left hvol (le_of_lt halpha).
--/
+    `m_DA / m_FP ≥ p̄_FP / p̄_DA`. -/
 theorem two_sided_revenue_comparison
     (DA FP : Mechanism) (alpha : ℝ)
     (D_star_DA R_star_DA D_star_FP R_star_FP : ℝ)
@@ -224,18 +191,16 @@ theorem two_sided_revenue_comparison
     Rev DA alpha D_star_DA R_star_DA ≥ Rev FP alpha D_star_FP R_star_FP := by
   unfold Rev; nlinarith;
 
-/-
-PROBLEM
-Proposition 2 (Two-sided equilibrium existence, `prop:two-sided-existence`):
-    The map Φ_M : [0, D̄] × [0, R̄] → [0, D̄] × [0, R̄] is continuous
-    and maps a compact convex set to itself. By Brouwer's fixed-point
-    theorem, a fixed point (D*, R*) exists.
+/-- Proposition 2 (Two-sided equilibrium existence, `prop:two-sided-existence`):
+    The map `Φ_M : [0, D̄] × [0, R̄] → [0, D̄] × [0, R̄]` is continuous and
+    maps a compact convex set to itself. By Brouwer's fixed-point theorem,
+    a fixed point `(D*, R*)` exists.
 
-PROVIDED SOLUTION
-Apply BrouwerFixedPoint or IsCompact.exists_fixedPoint_of_continuous
-from Mathlib. The hypotheses hrange_D and hrange_R ensure the map sends
-[0,D̄]×[0,R̄] into itself; continuity + compactness + convexity give Brouwer.
--/
+    This is the one retained formalization gap: Brouwer's fixed-point theorem
+    is not available in the pinned Mathlib environment used here. The result is
+    retained transparently rather than treated as a completed proof — under the usual
+    continuity-and-compact-convex-self-map hypotheses, existence follows
+    from Brouwer once Mathlib coverage is available. -/
 theorem two_sided_equilibrium_existence
     (M : Mechanism) (lam kap D_bar R_bar : ℝ) (F_C F_V_bar : ℝ → ℝ)
     (hD_bar_pos : D_bar > 0) (hR_bar_pos : R_bar > 0)

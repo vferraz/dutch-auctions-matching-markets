@@ -26,7 +26,7 @@ congestion/volume monotonicity, and Dutch dominance conditions.
 -/
 
 -- ============================================================
--- Definitions (self-contained for Aristotle)
+-- Definitions (self-contained)
 -- ============================================================
 
 /-- A reduced-form mechanism. -/
@@ -56,15 +56,9 @@ theorem match_volume_accounting
     M.m D R = D * M.q D R :=
   hm
 
-/-
-PROBLEM
-Proposition 4 (Congestion monotonicity under CRS, `prop:congestion-micro`):
+/-- Proposition 4 (Congestion monotonicity under CRS, `prop:congestion-micro`):
     Under CRS meetings, the driver-attractiveness cutoff c̄_M(D,R)
-    is strictly decreasing in D (holding R fixed).
-
-PROVIDED SOLUTION
-Unfold c_bar. For D₁ < D₂: q·π term strictly decreases (by hq_decr), and λ·τ term weakly increases (since τ increases and λ ≥ 0). So c_bar strictly decreases. Use linarith with hq_decr R D₁ D₂ h and have htau := htau_incr R D₁ D₂ h, and hlam.
--/
+    is strictly decreasing in D (holding R fixed). -/
 theorem congestion_monotonicity_CRS
     (M : Mechanism) (lam : ℝ)
     -- CRS hypothesis: q decreasing in D, tau increasing in D, pi·q decreasing in D
@@ -87,16 +81,13 @@ theorem volume_monotonicity_CRS
     ∀ (R : ℝ), ∀ (D₁ D₂ : ℝ), D₁ < D₂ → M.m D₁ R < M.m D₂ R :=
   hmvol
 
-/-
-PROBLEM
-Proposition 6 (Dutch dominance vs. batch, `prop:DA-vs-batch`):
+/-- Proposition 6 (Dutch dominance vs. batch, `prop:DA-vs-batch`):
     Under acceptance-rate matching, conditional payments are equal
     (π_DA = π_FPb), so the timing advantage λ·(T − τ_DA) > 0
     yields strict c̄ dominance for all λ > 0.
 
-PROVIDED SOLUTION
-Unfold c_bar. With hq_eq and hpi_eq, q_DA·π_DA = q_FPb·π_FPb. So the difference is purely λ·(T - τ_DA) > 0. Use nlinarith with htau_FPb D R, htau_DA_lt D R, hq_eq D R, hpi_eq D R.
--/
+    See `PaymentInequality.dutch_dominance_vs_batch_corrected` for the
+    strengthened statement under the payment inequality π_DA ≥ π_FPb. -/
 theorem dutch_dominance_vs_batch
     (DA FPb : Mechanism) (lam : ℝ) (T : ℝ)
     (hlam : lam > 0) (hT : T > 0)
@@ -113,17 +104,15 @@ theorem dutch_dominance_vs_batch
   simp [c_bar, hq_eq, hpi_eq, htau_FPb];
   nlinarith [ htau_DA_lt D R ]
 
-/-
-PROBLEM
-Proposition 7 (Dutch dominance vs. immediate: threshold, `prop:DA-vs-imm`):
-    Dutch dominance at fixed thickness holds iff λ ≥ λ*(θ,φ).
-    Case 1: q_DA·π_DA ≥ q_FPi·π_FPi → dominance for all λ ≥ 0.
-    Case 2: Genuine tradeoff → dominance requires λ ≥ λ* > 0.
-    Case 3: FPi dominates timing → dominance fails.
+/-- Proposition 7 (Dutch dominance vs. immediate: threshold, `prop:DA-vs-imm`):
+    Generic threshold form of Dutch dominance at fixed thickness, instantiated
+    against the rearranged hypothesis hlam_ge:
+        λ·(τ_FPi − τ_DA) ≥ q_FPi·π_FPi − q_DA·π_DA.
 
-PROVIDED SOLUTION
-Unfold c_bar. The hypothesis hlam_ge says for all D R: λ·(τ_FPi - τ_DA) ≥ q_FPi·π_FPi - q_DA·π_DA. This rearranges directly to q_DA·π_DA - λ·τ_DA ≥ q_FPi·π_FPi - λ·τ_FPi, which is c_bar DA ≥ c_bar FPi. Use linarith.
--/
+    Case 1 (DA dominates both): q_DA·π_DA ≥ q_FPi·π_FPi → dominance for all
+        λ ≥ 0; Case 2 (genuine tradeoff): dominance requires λ ≥ λ* > 0;
+        Case 3 (FPi dominates timing): dominance fails. The four-case sign
+        analysis on `A + λ·B` is in `DriverEntry.driver_dominance_case*`. -/
 theorem dutch_dominance_vs_immediate
     (DA FPi : Mechanism) (lam : ℝ)
     -- Timing gap positive (Case 2 precondition)
@@ -159,38 +148,33 @@ theorem batch_timing_gap
     FPb.tau D R - DA.tau D R > 0 := by
   linarith
 
-/-
-Negative-result theorem for Gate G2 in `STRATEGIC_OPTIONS.md`.
+/-- Reverse timing comparison under a convex DA hazard with ARM endpoint.
 
-Under the acceptance-rate-matching (ARM) condition, the cumulative DA hazard
-`H^DA(t) = μ_D · ∫₀^t F̄_V(p^DA(s)) ds` is convex on `[0, T]` (because
-`h^DA(t) = μ_D · F̄_V(p^DA(t))` is increasing in `t` when `p^DA(t) = p_0 e^{-δt}`
-is decreasing and `F̄_V` is decreasing). ARM forces `H^DA(0) = 0` and
-`H^DA(T) = η · T` where `η = μ_D · F̄_V(p̄)` is the FPi hazard rate.
-The chord-bound for convex functions on `[0,T]` then gives `H^DA(t) ≤ η·t`
-pointwise on `[0,T]`, hence `S^DA(t) = exp(-H^DA t) ≥ exp(-η·t)` pointwise,
-and integrating yields
+    Under the acceptance-rate-matching (ARM) condition, the cumulative DA hazard
+    `H^DA(t) = μ_D · ∫₀^t F̄_V(p^DA(s)) ds` is convex on `[0, T]` (because
+    `h^DA(t) = μ_D · F̄_V(p^DA(t))` is increasing in `t` when `p^DA(t) = p_0
+    e^{-δt}` is decreasing and `F̄_V` is decreasing). ARM forces `H^DA(0) = 0`
+    and `H^DA(T) = η · T` where `η = μ_D · F̄_V(p̄)` is the FPi hazard rate.
+    The chord bound for convex functions on `[0,T]` then gives
+    `H^DA(t) ≤ η·t` pointwise on `[0,T]`, hence
+    `S^DA(t) = exp(−H^DA t) ≥ exp(−η·t)` pointwise, and integrating yields
 
-    τ_DA = ∫₀^T S^DA(t) dt  ≥  ∫₀^T exp(-η·t) dt = τ_FPi.
+        τ_DA = ∫₀^T S^DA(t) dt  ≥  ∫₀^T exp(−η·t) dt = τ_FPi.
 
-This shows that the GATE G2 INEQUALITY (`τ_DA ≤ τ_FPi`) FAILS UNDER ARM:
-Dutch is generically slower than fixed-price-immediate when acceptance rates
-are matched. Verified numerically against v1 OA Table OA.1 in
-`private_workspace/misc/verify_g2_g3_baselines.md`: 7 of 10 baselines are
-Case 4 (Dutch slower), with `Δτ < 0` ranging from -3.0 to -0.5 minutes.
+    Consequently the naive inequality `τ_DA ≤ τ_FPi` fails under ARM:
+    Dutch is generically *slower* than fixed-price-immediate when acceptance
+    rates are matched. Numerical verification across baseline scenarios from
+    the paper's Table OA.1 shows the reversed sign in the majority of rows
+    (Case 4 in the four-case classification, with `Δτ` ranging from −3.0 to
+    −0.5 minutes). The honest statement is the four-case theorem in
+    `DriverEntry.driver_dominance_case*`: Cases 1, 2, and 4 give DA dominance
+    under named conditions; Case 3 gives FP dominance.
 
-Strategic implication: `STRATEGIC_OPTIONS.md` Decision A (promoting OA.7 /
-Prop 12c to a primitive theorem with an unconditional `τ_DA ≤ τ_FPi`
-hypothesis) is not viable in its current form. The honest reframe is a
-bidirectional four-case theorem: Cases 1, 2, 4 give DA dominance under
-named conditions; Case 3 gives FP dominance under named conditions.
-
-The theorem below is the abstract version of the negative result. It
-proves the integral comparison for any convex hazard `H` with the ARM
-endpoint condition `H(T) = η·T`, without committing to a specific
-`PoissonPrimitives` structure (full integration formalism for the
-Poisson-specialization is out of scope for this work item).
--/
+    The theorem below is the abstract form of the reverse comparison. It
+    proves the integral inequality for any convex hazard `H` with the ARM
+    endpoint condition `H(T) = η·T`, without committing to a specific
+    Poisson microfoundation structure; the full integration formalism for the
+    Poisson specialization is outside the current scope. -/
 theorem tau_ge_under_convex_hazard
     (T η : ℝ) (H : ℝ → ℝ)
     (hT : 0 < T)

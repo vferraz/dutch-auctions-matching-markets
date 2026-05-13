@@ -25,32 +25,34 @@ This file corrects the payment-equality claim in Proposition OA.6 / main text
 Proposition 1(d). The original code (`Microfoundation.lean`, theorem
 `dutch_dominance_vs_batch`) assumes `hpi_eq : ∀ D R, DA.pi D R = FPb.pi D R`.
 
-The SymPy verification (`dutch_auction/verify_section4.py`) proved numerically
-that under the Poisson microfoundation with uniform rider values and a declining
-Dutch price path p(t) = p₀ e^{−δt}:
+The numerical diagnostics (`dutch_auction/verify_section4.py`) illustrate that
+under the Poisson microfoundation with uniform rider values and a declining Dutch
+price path p(t) = p₀ e^{−δt}:
 
   E[p^DA(X) | X ≤ T] > p̄_ARM
 
 because the survival function S^DA(t) front-loads trades to early times where
 prices are high. The acceptance-rate-matching (ARM) condition equates the
-**time-averaged** acceptance rate to (1 − p̄), but the **trade-weighted**
-average price exceeds p̄. Therefore π_DA > π_FPb under ARM.
+**time-averaged** acceptance rate to (1 − p̄), while the **trade-weighted**
+average price can exceed p̄.
 
-This STRENGTHENS the dominance result: Dutch beats batch clearing through
-BOTH a timing advantage AND an earnings advantage, not timing alone.
+This file does not derive the payment inequality from the Poisson primitives.
+It records the corrected conditional statement: if the trade-weighted Dutch
+payment is at least the posted-price benchmark, then the batch comparison gains
+a non-negative earnings term in addition to the timing term.
 
 We provide:
-1. A strengthened `dutch_dominance_vs_batch_corrected` replacing `hpi_eq`
-   with the weaker (and correct) `hpi_ge : ∀ D R, DA.pi D R ≥ FPb.pi D R`.
+1. A conditional `dutch_dominance_vs_batch_corrected` replacing `hpi_eq`
+   with the explicit hypothesis `hpi_ge : ∀ D R, DA.pi D R ≥ FPb.pi D R`.
 2. The corrected c̄ difference decomposition under ARM.
-3. A front-loading lemma formalizing the trade-weighted price inequality.
+3. Reduced-form diagnostics for the trade-weighted price condition.
 
 Paper reference: Section 4 (corrected), Proposition 1(d), Remark 4
 (rem:payment-equality, corrected), and Proposition OA.6 in the Online Appendix.
 -/
 
 -- ============================================================
--- Definitions (self-contained for Aristotle)
+-- Definitions (self-contained)
 -- ============================================================
 
 /-- A reduced-form mechanism. -/
@@ -72,36 +74,24 @@ def c_bar (M : Mechanism) (lam : ℝ) (D R : ℝ) : ℝ :=
 
 namespace PaymentInequality
 
-/-
-PROBLEM
-Front-loading principle for declining price paths:
-    If the Dutch price path is strictly decreasing and the survival
-    function S^DA(t) is also decreasing (front-loading trades to early
-    times), then the trade-weighted average price exceeds the
-    time-averaged price. Under ARM, the time-averaged acceptance rate
-    equals (1 − p̄), so the trade-weighted average price exceeds p̄.
+/-- Front-loading principle for declining Dutch price paths (reduced-form
+    assumption form).
 
-    Numerically verified in `dutch_auction/verify_section4.py`:
-    At baseline (A=0.5, β=0.5, T=30, ρ=0.7, δ=0.02, θ=1.0),
-    E[p^DA(X)|X≤T] = 0.630 vs p̄_ARM = 0.526.
+    Under ARM with a strictly decreasing Dutch price path
+    `p^DA(t) = p₀ · e^{−δt}` and a decreasing survival function `S^DA(t)`,
+    trades concentrate at early times where prices are high. The
+    trade-weighted average price then exceeds the time-averaged price;
+    since ARM equates the time-averaged acceptance rate to `(1 − p̄)`,
+    the trade-weighted average price exceeds `p̄`. Consequently
+    `π_DA ≥ π_FPb` under ARM, with strict inequality when `δ > 0` and
+    `q_DA > 0`.
 
-    We state this as an assumption at the reduced-form level:
-    π_DA ≥ π_FPb under ARM.
+    Numerical illustration at a representative baseline
+    (A=0.5, β=0.5, T=30, ρ=0.7, δ=0.02, θ=1.0):
+    `E[p^DA(X) | X ≤ T] = 0.630` vs `p̄_ARM = 0.526`.
 
-Front-loading principle (assumption, verified numerically):
-    Under ARM with a declining Dutch price path, the trade-weighted
-    average price weakly exceeds the posted price. Consequently,
-    π_DA ≥ π_FPb. This is strict when δ > 0 and q_DA > 0, but the
-    weak version suffices for the dominance theorem.
-
-PROVIDED SOLUTION
-The trade-weighted price strictly exceeds p̄ whenever the price path is
-strictly decreasing (δ > 0) and q_DA > 0. Since π_M = (1−α) · E[price|trade],
-this gives π_DA > π_FPb = (1−α)p̄. We formalize the weak version (≥) as the
-hypothesis for the dominance theorem.
-
-This is trivially the hypothesis hpi_ge itself.
--/
+    At the reduced-form level we expose `π_DA ≥ π_FPb` as a hypothesis
+    `hpi_ge` rather than derive it from Poisson primitives. -/
 theorem front_loading_payment_inequality
     (DA FPb : Mechanism) (D R : ℝ)
     (hpi_ge : DA.pi D R ≥ FPb.pi D R) :
@@ -109,22 +99,17 @@ theorem front_loading_payment_inequality
   by
     lia
 
-/-
-PROBLEM
-Corrected c̄ difference under ARM (replacing paper eq. 10):
-    Under ARM, q_DA = q_FPb. With the CORRECT payment inequality
-    (π_DA ≥ π_FPb instead of equality), the dominance margin is:
+/-- Corrected c̄ difference under ARM.
 
-    c̄_DA − c̄_FPb = q · (π_DA − π_FPb) + λ · (T − τ_DA)
+    Under ARM, `q_DA = q_FPb`. With the payment inequality
+    `π_DA ≥ π_FPb` (rather than the limit-case equality), the dominance
+    margin decomposes as
 
-    The paper claims c̄_DA − c̄_FPb = λ(T − τ_DA), which drops the
-    positive earnings term q · (π_DA − π_FPb).
+        c̄_DA − c̄_FPb = q · (π_DA − π_FPb) + λ · (T − τ_DA).
 
-PROVIDED SOLUTION
-Unfold c_bar. Substitute q_DA = q_FPb (from hq_eq) and τ_FPb = T (from htau_FPb). The identity follows by ring.
-
-Unfold c_bar, substitute hq_eq and htau_FPb, then ring.
--/
+    Under the payment hypothesis, the earnings term
+    `q · (π_DA − π_FPb)` is an additional non-negative contribution
+    besides the timing term `λ · (T − τ_DA)`. -/
 theorem cbar_difference_under_ARM
     (DA FPb : Mechanism) (lam T : ℝ) (D R : ℝ)
     -- ARM: match probabilities equal
@@ -135,21 +120,13 @@ theorem cbar_difference_under_ARM
     DA.q D R * (DA.pi D R - FPb.pi D R) + lam * (T - DA.tau D R) := by
   unfold c_bar; rw [ hq_eq, htau_FPb ] ; ring;
 
-/-
-PROBLEM
-Strengthened Dutch dominance vs. batch (corrected Proposition OA.6 /
-Proposition 1(d)):
-    Under ARM, with π_DA ≥ π_FPb (payment inequality, NOT equality),
-    Dutch strictly dominates batch clearing for all λ > 0.
+/-- Conditional Dutch dominance vs. batch (Proposition OA.6 /
+    Proposition 1(d)).
 
-    This replaces `Microfoundation.dutch_dominance_vs_batch` which
-    assumed `hpi_eq : ∀ D R, DA.pi D R = FPb.pi D R`.
-
-PROVIDED SOLUTION
-Unfold c_bar. With hq_eq, DA.q = FPb.q. With htau_FPb, FPb.tau = T. The difference is q·(π_DA - π_FPb) + λ·(T - τ_DA). The first term is ≥ 0 (by hpi_ge and hq_nonneg). The second term is > 0 (by hlam and htau_DA_lt). Sum is > 0 hence ≥ 0. Use nlinarith.
-
-Intro D R. Unfold c_bar. Rewrite hq_eq and htau_FPb. The difference is q*(pi_DA - pi_FPb) + lam*(T - tau_DA). Use nlinarith with hpi_ge D R, hq_nonneg D R, htau_DA_lt D R.
--/
+    Under ARM with the explicit payment hypothesis `π_DA ≥ π_FPb`,
+    Dutch dominates batch clearing for all `λ > 0`. This records the
+    conditional comparison rather than deriving the payment inequality
+    from Poisson primitives. -/
 theorem dutch_dominance_vs_batch_corrected
     (DA FPb : Mechanism) (lam : ℝ) (T : ℝ)
     (hlam : lam > 0) (hT : T > 0)
@@ -168,16 +145,8 @@ theorem dutch_dominance_vs_batch_corrected
     unfold c_bar; rw [ hq_eq, htau_FPb ] ; ring;
   nlinarith [ hq_nonneg D R, hpi_ge D R, htau_DA_lt D R ]
 
-/-
-PROBLEM
-The strengthened theorem implies the original: if π_DA = π_FPb
-(the original hypothesis), then certainly π_DA ≥ π_FPb.
-
-PROVIDED SOLUTION
-Apply dutch_dominance_vs_batch_corrected with hpi_ge derived from hpi_eq via le_of_eq.
-
-Apply dutch_dominance_vs_batch_corrected. For hpi_ge, use fun D R => le_of_eq (hpi_eq D R).
--/
+/-- The strengthened theorem implies the limit case: if `π_DA = π_FPb`,
+    then certainly `π_DA ≥ π_FPb`. -/
 theorem dutch_dominance_vs_batch_from_equality
     (DA FPb : Mechanism) (lam : ℝ) (T : ℝ)
     (hlam : lam > 0) (hT : T > 0)
@@ -191,18 +160,10 @@ theorem dutch_dominance_vs_batch_from_equality
   by
     exact fun D R => dutch_dominance_vs_batch_corrected DA FPb lam T hlam hT hq_eq ( fun D R => hpi_eq D R ▸ le_rfl ) hq_nonneg htau_DA_lt htau_FPb D R
 
-/-
-PROBLEM
-Strict c̄ dominance: the corrected version gives a STRICT inequality,
-not just weak dominance. The paper states c̄_DA − c̄_FPb = λ(T − τ_DA) > 0,
-but the correct bound is even larger:
-    c̄_DA − c̄_FPb ≥ λ(T − τ_DA) > 0.
-
-PROVIDED SOLUTION
-Unfold c_bar, substitute hq_eq and htau_FPb. The difference is q·(π_DA - π_FPb) + λ·(T - τ_DA). Since q ≥ 0 and π_DA ≥ π_FPb, the first term is ≥ 0. Since λ > 0 and T > τ_DA, the second term is > 0. Sum is > 0. Use nlinarith.
-
-Unfold c_bar. Rewrite hq_eq and htau_FPb. The difference is q*(pi_DA - pi_FPb) + lam*(T - tau_DA). First term >= 0 by hq_nonneg and hpi_ge. Second term > 0 by hlam and htau_DA_lt. Use nlinarith.
--/
+/-- Strict c̄ dominance: the strengthened form gives a strict inequality.
+    Beyond the timing-only bound `c̄_DA − c̄_FPb = λ · (T − τ_DA) > 0`,
+    the corrected decomposition yields the larger margin
+    `c̄_DA − c̄_FPb ≥ λ · (T − τ_DA) > 0`. -/
 theorem dutch_dominance_vs_batch_strict
     (DA FPb : Mechanism) (lam : ℝ) (T : ℝ) (D R : ℝ)
     (hlam : lam > 0)
@@ -216,18 +177,13 @@ theorem dutch_dominance_vs_batch_strict
     rw [ ← hq_eq, htau_FPb ] ; nlinarith;
   convert h_ineq' using 1 <;> push_cast [ hq_eq, htau_FPb, c_bar ] <;> ring
 
-/-
-PROBLEM
-Lower bound on the dominance margin: under the corrected hypotheses,
-    c̄_DA − c̄_FPb ≥ λ · (T − τ_DA).
-This is the paper's claimed formula (eq. 10) reinterpreted as a
-LOWER BOUND rather than an equality.
+/-- Lower bound on the dominance margin: under the corrected hypotheses,
 
-PROVIDED SOLUTION
-Use cbar_difference_under_ARM to decompose the difference. The earnings term q·(π_DA − π_FPb) is ≥ 0 by hq_nonneg and hpi_ge. The timing term is λ·(T − τ_DA). So the sum ≥ λ·(T − τ_DA). Use linarith/nlinarith.
+        c̄_DA − c̄_FPb ≥ λ · (T − τ_DA).
 
-Use cbar_difference_under_ARM to rewrite the LHS. Then the result follows from nlinarith using hq_nonneg and hpi_ge (since q*(pi_DA - pi_FPb) >= 0).
--/
+    The paper's Eq. (10) is reinterpreted as a lower bound rather than an
+    equality; the earnings term `q · (π_DA − π_FPb)` is the additional
+    non-negative margin. -/
 theorem dominance_margin_lower_bound
     (DA FPb : Mechanism) (lam T : ℝ) (D R : ℝ)
     (hq_eq : DA.q D R = FPb.q D R)
@@ -238,32 +194,17 @@ theorem dominance_margin_lower_bound
   unfold c_bar;
   cases le_total lam 0 <;> cases le_total ( DA.pi D R ) 0 <;> simp_all +decide <;> nlinarith
 
-/-
-PROBLEM
-Welfare implication: under ARM with the corrected payment inequality,
-the welfare comparison W_DA vs W_FPb is even more favorable than claimed.
+/-- Welfare invariance under the payment correction.
 
-Welfare at fixed thickness:
-    W_M = m_M · s − λ · D · τ_M − κ · R · τ^R_M
+    Welfare at fixed thickness is
 
-Under ARM: q_DA = q_FPb → m_DA = m_FPb (given m = D·q).
-With the payment inequality, drivers get more per match under Dutch,
-so the surplus from driver-side transfers is also higher. But since
-monetary payments cancel in welfare (quasilinear), the welfare
-comparison depends only on volume and waiting times — identical to
-the original claim.
+        W_M = m_M · s − λ · D · τ_M − κ · R · τ^R_M.
 
-The key insight: the payment inequality affects ENTRY incentives
-(c̄ and hence D*) but NOT welfare at fixed thickness, because
-welfare uses m·s − waiting costs, and payments are transfers.
-
-PROVIDED SOLUTION
-The payment inequality does not enter the welfare formula directly. However, the strengthened c̄ dominance DOES affect equilibrium thickness (D*, R*), potentially amplifying the welfare gain at equilibrium.
-
-This theorem records the observation that at FIXED thickness under ARM, the welfare comparison is unchanged (it depends only on volume and timing).
-
-Rewrite hm_eq. Then nlinarith using mul_pos hlam hD, mul_pos hkap hR, htau_strict, htauR_strict, hD, hR.
--/
+    Under ARM, `q_DA = q_FPb` gives `m_DA = m_FPb` (since `m = D · q`).
+    Because monetary payments cancel in welfare (quasilinearity), the
+    fixed-thickness welfare comparison depends only on volume and waiting
+    times — the payment inequality `π_DA ≥ π_FPb` affects entry incentives
+    via `c̄` (and hence `D*`), but not fixed-thickness welfare directly. -/
 theorem welfare_vs_batch_invariant_under_payment_correction
     (DA FPb : Mechanism) (s lam kap D R : ℝ)
     -- These are the SAME hypotheses as in Welfare.welfare_vs_batch
@@ -277,25 +218,24 @@ theorem welfare_vs_batch_invariant_under_payment_correction
       FPb.m D R * s - lam * D * FPb.tau D R - kap * R * FPb.tauR D R := by
   nlinarith [ mul_pos hlam hD, mul_pos hkap hR ]
 
-/-
-Algebraic helper for the G3 conditional structure.
+/-- Algebraic helper for the conditional payment-inequality structure.
 
-A trade-weighted average over a partition `[0, t*] ∪ (t*, T]` with mass
-fractions `θ ∈ [0, 1]` and `(1 − θ)` is at least `θ · p̄` whenever the
-pre-`t*` component price `p_pre` exceeds `p̄` and the post-`t*` component
-price `p_post` is nonneg.
+    A trade-weighted average over a partition `[0, t*] ∪ (t*, T]` with mass
+    fractions `θ ∈ [0, 1]` and `(1 − θ)` is at least `θ · p̄` whenever the
+    pre-`t*` component price `p_pre` exceeds `p̄` and the post-`t*` price
+    `p_post` is non-negative.
 
-This is the structural content of v1 OA.6's "front-loading" argument: under
-ARM, IF most trade mass concentrates at `t ≤ t*` where `p^DA(t) ≥ p̄`, then
-the trade-weighted price is bounded below by `θ · p̄`. Combined with
-`q_DA = q_FPb` (ARM), this gives `π_DA ≥ θ · π_FPb`, with `π_DA ≥ π_FPb`
-iff `θ = 1` OR the post-`t*` average price compensates.
+    This is the structural content of the front-loading argument behind
+    Proposition OA.6: under ARM, if most trade mass concentrates at
+    `t ≤ t*` where `p^DA(t) ≥ p̄`, then the trade-weighted price is bounded
+    below by `θ · p̄`. Combined with `q_DA = q_FPb` (ARM) this gives
+    `π_DA ≥ θ · π_FPb`, with `π_DA ≥ π_FPb` exactly when `θ = 1` or the
+    post-`t*` average price compensates.
 
-Numerical verification (`private_workspace/misc/verify_g2_g3_baselines.md`):
-`θ_pre ≈ 0.97` at the v1 baseline (T=30, ρ=0.7), `θ_pre ≈ 0.44` at the
-short-T stress row (T=1, ρ=0.7, η·T=0.5) — and the latter row is exactly
-where G3 fails.
--/
+    Numerical verification across baseline scenarios from Table OA.1 shows
+    `θ_pre ≈ 0.97` at typical baselines (T=30, ρ=0.7), versus
+    `θ_pre ≈ 0.44` in short-session stress rows (T=1, ρ=0.7, η·T=0.5)
+    where the substantive condition fails. -/
 theorem trade_weighted_price_ge_threshold
     (theta pbar p_pre p_post : ℝ)
     (htheta_nn : 0 ≤ theta) (htheta_le : theta ≤ 1)
@@ -305,27 +245,22 @@ theorem trade_weighted_price_ge_threshold
     theta * p_pre + (1 - theta) * p_post ≥ theta * pbar := by
   nlinarith [htheta_nn, htheta_le, hpre, hpost, hpbar]
 
-/-
-Conditional payment inequality from the trade-weighted-average diagnostic.
+/-- Conditional payment inequality from the trade-weighted-average diagnostic.
 
-Replaces the v1 tautology `front_loading_payment_inequality` with a
-CONDITIONAL theorem whose hypothesis `h_avg_ge` is directly verifiable
-from numerical computation of the trade-weighted DA price. The hypothesis
-`DA.pi D R ≥ (1 - alpha) * pbar` is the SUBSTANTIVE content that v1 OA.6's
-front-loading argument established only verbally; we do not derive it from
-Poisson primitives in Lean (that would require integration formalism
-estimated at ~1 week — see `private_workspace/misc/verify_g2_g3_baselines.md`
-and the planning artefact at `~/.claude/plans/lean-close-curious-wilkinson.md`).
+    Refines the tautological form of `front_loading_payment_inequality`
+    into a *conditional* theorem whose hypothesis `h_avg_ge` is directly
+    verifiable from a numerical computation of the trade-weighted DA price.
+    The hypothesis `DA.pi D R ≥ (1 − α) · p̄` is the substantive content
+    that Proposition OA.6's front-loading argument establishes verbally;
+    deriving it from Poisson primitives requires an integration formalism
+    that is outside the current scope.
 
-Strategic note: this is NOT a primitive proof of `π_DA ≥ π_FPb`. It is a
-conditional theorem making the substantive dependency explicit — the
-"trade-weighted average DA price exceeds `p̄`" diagnostic is what was
-implicit in the v1 tautology, now named as a hypothesis. Per
-`STRATEGIC_OPTIONS.md`, the unconditional gate G3 closure is not feasible
-within the project's effort budget. This conditional form is the honest
-replacement: callers must supply `h_avg_ge` with explicit applicability
-conditions (numerically verified at baselines, FAILS in short-T stress).
--/
+    This is *not* a primitive proof of `π_DA ≥ π_FPb`. It is a conditional
+    theorem making the substantive dependency explicit — the
+    trade-weighted-average DA-price diagnostic is named as a hypothesis,
+    and callers must supply `h_avg_ge` together with its applicability
+    conditions (numerically verified at typical baselines, fails in
+    short-session stress regimes). -/
 theorem pi_DA_ge_pi_FPb_under_premium_average
     (DA FPb : Mechanism) (D R alpha pbar : ℝ)
     (hα     : alpha < 1)

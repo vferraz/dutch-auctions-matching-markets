@@ -26,7 +26,7 @@ Corollaries 5–6.
 -/
 
 -- ============================================================
--- Definitions (self-contained for Aristotle)
+-- Definitions (self-contained)
 -- ============================================================
 
 structure Mechanism where
@@ -60,14 +60,8 @@ theorem dutch_price_bounds
     pmin ≤ DA.pbar D R ∧ DA.pbar D R ≤ p0 := by
   exact ⟨hpbar_ge, hpbar_le⟩
 
-/-
-PROBLEM
-Corollary 5 (Sufficient condition for Dutch price dominance, `cor:price-dominance`):
-    If the minimum clock price exceeds the posted price, p̄_DA ≥ p̄.
-
-PROVIDED SOLUTION
-From hfloor: pmin ≥ pbar_FP, and hpbar_ge: DA.pbar D R ≥ pmin. By transitivity: DA.pbar D R ≥ pmin ≥ pbar_FP. Use linarith.
--/
+/-- Corollary 5 (Sufficient condition for Dutch price dominance, `cor:price-dominance`):
+    If the minimum clock price exceeds the posted price, `p̄_DA ≥ p̄`. -/
 theorem dutch_price_dominance
     (DA : Mechanism) (pbar_FP pmin : ℝ) (D R : ℝ)
     -- Floor exceeds posted price
@@ -78,15 +72,9 @@ theorem dutch_price_dominance
   -- By transitivity of inequalities, if $pmin \geq pbar_FP$ and $DA.pbar D R \geq pmin$, then $DA.pbar D R \geq pbar_FP$.
   apply le_trans hfloor hpbar_ge
 
-/-
-PROBLEM
-Theorem 3 (Revenue dominance, `thm:revenue`), one-sided case:
-    Under (i) driver-side dominance, (ii) price non-deterioration,
-    (iii) volume monotonicity: Rev_DA ≥ Rev_FP.
-
-PROVIDED SOLUTION
-Unfold Rev. Need α·m_DA·p̄_DA ≥ α·m_FP·p̄_FP. Since α > 0, suffices m_DA·p̄_DA ≥ m_FP·p̄_FP. We have m_DA ≥ m_FP ≥ 0 and p̄_DA ≥ p̄_FP ≥ 0. So m_DA·p̄_DA ≥ m_FP·p̄_DA ≥ m_FP·p̄_FP. Use nlinarith with hvol, hprice, hm_pos, hp_pos, halpha.
--/
+/-- Theorem 3 (Revenue dominance, `thm:revenue`), one-sided case:
+    Under (i) driver-side dominance, (ii) price non-deterioration, and
+    (iii) volume monotonicity, `Rev_DA ≥ Rev_FP`. -/
 theorem revenue_dominance_one_sided
     (DA FP : Mechanism) (alpha R : ℝ)
     (D_star_DA D_star_FP : ℝ)
@@ -104,15 +92,9 @@ theorem revenue_dominance_one_sided
   unfold Rev;
   gcongr ; nlinarith [ mul_le_mul_of_nonneg_left hprice halpha.le, mul_le_mul_of_nonneg_left hvol halpha.le ] ;
 
-/-
-PROBLEM
-Theorem 3, two-sided extension:
-    When rider entry is endogenous, the argument uses Theorem 2
-    for entry dominance in both D and R.
-
-PROVIDED SOLUTION
-Same as one_sided: unfold Rev. Need α·m_DA·p̄_DA ≥ α·m_FP·p̄_FP. Since α > 0, suffices m_DA·p̄_DA ≥ m_FP·p̄_FP. We have m_DA ≥ m_FP ≥ 0 and p̄_DA ≥ p̄_FP ≥ 0. Use nlinarith.
--/
+/-- Theorem 3, two-sided extension:
+    When rider entry is endogenous, the argument uses Theorem 2 for entry
+    dominance in both `D` and `R`. -/
 theorem revenue_dominance_two_sided
     (DA FP : Mechanism) (alpha : ℝ)
     (D_star_DA R_star_DA D_star_FP R_star_FP : ℝ)
@@ -132,15 +114,9 @@ theorem revenue_dominance_two_sided
   unfold Rev;
   nlinarith [ mul_le_mul_of_nonneg_left hprice halpha.le, mul_le_mul_of_nonneg_left hvol halpha.le, mul_le_mul_of_nonneg_left hp_pos halpha.le, mul_le_mul_of_nonneg_left hm_pos halpha.le ]
 
-/-
-PROBLEM
-Corollary 6 (Revenue lower bound, `cor:rev-lower-bound`):
-    D*_DA / D*_FP ≤ Rev_DA / Rev_FP (entry advantage is a lower bound).
-    Requires q_FP > 0 to ensure Rev_FP > 0.
-
-PROVIDED SOLUTION
-Show Rev_FP > 0, clear denominators with field_simp, then nlinarith.
--/
+/-- Corollary 6 (Revenue lower bound, `cor:rev-lower-bound`):
+    `D*_DA / D*_FP ≤ Rev_DA / Rev_FP`: the entry advantage is a lower bound
+    on the revenue ratio. Requires `q_FP > 0` to ensure `Rev_FP > 0`. -/
 theorem revenue_lower_bound
     (DA FP : Mechanism) (alpha : ℝ)
     (D_star_DA R_star_DA D_star_FP R_star_FP : ℝ)

@@ -19,13 +19,15 @@ set_option autoImplicit false
 noncomputable section
 
 /-!
-# Basic Definitions for Dutch Auction TEV Framework
+# Basic Definitions
 
-Core definitions shared across all files. Each theorem file redeclares the
-definitions it needs for Aristotle compatibility.
+Core definitions shared across the formalization: the `Mechanism` structure,
+entry cutoffs, equilibrium maps, and the revenue and welfare functionals.
+Each file in `DutchAuction/` redeclares the definitions it needs so that
+the files remain self-contained.
 
-Paper: "Dutch Clock Trading vs. Posted Prices in Time-Sensitive Matching Markets"
-(Pitz & Ferraz, 2026), v11.
+Paper: "Timing, Entry, and Revenue in Clock-Based Platform Markets"
+(Pitz and Ferraz, 2026).
 -/
 
 /-- A reduced-form mechanism in a matching market, characterized by six
@@ -46,42 +48,42 @@ structure Mechanism where
   pbar : ℝ → ℝ → ℝ
 
 /-- Driver-entry cutoff: c̄_M(D,R) = q_M · π_M - λ · τ_M.
-    A driver enters iff c ≤ c̄_M. Paper Eq. (7), line ~520 of v11. -/
+    A driver enters iff c ≤ c̄_M. Paper Eq. (7). -/
 def c_bar (M : Mechanism) (lam : ℝ) (D R : ℝ) : ℝ :=
   M.q D R * M.pi D R - lam * M.tau D R
 
 /-- Rider match probability from accounting identity: q^R_M = m_M / R.
-    Paper Prop. 10, Eq. (26), line ~2248. -/
+    Paper Prop. 10, Eq. (26). -/
 def qR (M : Mechanism) (D R : ℝ) : ℝ :=
   M.m D R / R
 
 /-- Rider-entry cutoff: v̄_M(D,R) = p̄_M + κ · τ^R_M / q^R_M.
-    A rider enters iff v ≥ v̄_M. Paper Eq. (18), line ~1692. -/
+    A rider enters iff v ≥ v̄_M. Paper Eq. (18). -/
 def v_bar (M : Mechanism) (kap : ℝ) (D R : ℝ) : ℝ :=
   M.pbar D R + kap * M.tauR D R / (qR M D R)
 
 /-- Driver-side entry map: Φ^D_M(D,R) = D̄ · F_C(c̄_M(D,R)).
-    Paper Eq. (12), line ~1427. -/
+    Paper Eq. (12). -/
 def Phi_D (M : Mechanism) (lam D_bar : ℝ) (F_C : ℝ → ℝ) (D R : ℝ) : ℝ :=
   D_bar * F_C (c_bar M lam D R)
 
 /-- Rider-side entry map: Φ^R_M(D,R) = R̄ · F̄_V(v̄_M(D,R)).
-    Paper Eq. (22), line ~1717. -/
+    Paper Eq. (22). -/
 def Phi_R (M : Mechanism) (kap R_bar : ℝ) (F_V_bar : ℝ → ℝ) (D R : ℝ) : ℝ :=
   R_bar * F_V_bar (v_bar M kap D R)
 
 /-- Platform revenue: Rev_M = α · m_M · p̄_M.
-    Paper Eq. (25), line ~2417. -/
+    Paper Eq. (25). -/
 def Rev (M : Mechanism) (alpha D R : ℝ) : ℝ :=
   alpha * M.m D R * M.pbar D R
 
 /-- Welfare at fixed thickness: W_M(D,R) = m·s - λ·D·τ - κ·R·τ^R.
-    Paper Prop. 14, line ~2819. -/
+    Paper Prop. 14. -/
 def Welfare (M : Mechanism) (s lam kap D R : ℝ) : ℝ :=
   M.m D R * s - lam * D * M.tau D R - kap * R * M.tauR D R
 
 /-- Aggregate waiting-cost change at equilibrium: Δ_wait.
-    Paper Eq. (29), line ~2965 of v11. -/
+    Paper Eq. (29). -/
 def Delta_wait (DA FP : Mechanism) (lam kap D1 R1 D2 R2 : ℝ) : ℝ :=
   lam * (D1 * DA.tau D1 R1 - D2 * FP.tau D2 R2) +
   kap * (R1 * DA.tauR D1 R1 - R2 * FP.tauR D2 R2)

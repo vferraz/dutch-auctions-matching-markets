@@ -9,8 +9,8 @@ package DutchAuction where
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4"@"master-2026-03-29"
 
--- Each .lean file is self-contained (for Aristotle).
--- We build them as independent roots under a single library.
+-- Each .lean file is self-contained; we build them as independent roots
+-- under a single library.
 @[default_target]
 lean_lib DutchAuction where
   srcDir := "DutchAuction"

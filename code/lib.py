@@ -1,8 +1,7 @@
 """
 Core mechanism functions and equilibrium solver for
-"Dutch Clock Trading vs. Posted Prices in Time-Sensitive Matching Markets".
-
-All formulas from Section 5 (lines 910-1018) of dutch_auction_carpooling_v17.tex.
+"Timing, Entry, and Revenue in Clock-Based Platform Markets"
+(Pitz and Ferraz, 2026).
 """
 
 import numpy as np

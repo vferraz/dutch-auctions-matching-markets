@@ -1,24 +1,23 @@
-# Dutch auctions in clock-based platform markets
+# Replication package: clock-based platform markets
 
-Public artifacts for the paper:
+This repository contains replication artifacts for:
 
 > **Timing, Entry, and Revenue in Clock-Based Platform Markets**  
-> Pitz and Ferraz (2026)  
-> Submitted to Management Science
+> Pitz and Ferraz (2026)
 
 ## Repository contents
 
-- `lean4/` - Lean 4 formalization of the paper's theorems
+- `lean4/` - Lean 4 audit files for the algebraic and order-theoretic components
 - `code/` - simulation code, replication scripts, and figure generation
 - `code/paper_figures/` - figures used in the paper
 
-The repository is organized as a compact public companion for the
-project rather than a full research workspace.
+The repository is organized as a compact replication package rather than a
+full research workspace.
 
 ## Lean formalization
 
-The Lean tree contains 57 theorems across 7 files, with 1 remaining
-`sorry`: the Brouwer fixed-point theorem in
+The Lean tree contains 57 theorem and lemma declarations across 7 files,
+with 1 remaining `sorry`: the Brouwer fixed-point theorem in
 `lean4/DutchAuction/TwoSidedEntry.lean`, which remains gated on Mathlib
 coverage.
 
@@ -62,16 +61,3 @@ python3 script_figures_quant.py
 
 The exported PNGs used by the paper are in `code/paper_figures/`.
 Generated story-figure outputs are in `code/figures_story_quant/`.
-
-## Companion paper
-
-A companion paper studies the one-lot Dutch auction with bidder waiting
-costs and identifies a void-tax effect under voluntary participation.
-That work has its own repository at
-`github.com/vferraz/dutch-auctions-clock-speed` (in progress).
-
-## Tags
-
-- `v1-geb-submission` - state at the April 2026 GEB submission.
-- `v2-mansci-submission` - state at the Management Science submission
-  (May 2026).

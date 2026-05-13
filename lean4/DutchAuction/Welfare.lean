@@ -22,11 +22,11 @@ noncomputable section
 # Welfare Analysis (Section 10)
 
 Propositions 14–17, Corollary 7. Includes the reformulated Proposition 17
-(equilibrium welfare comparison with threshold s**) from the Phase 1 audit fix.
+(equilibrium welfare comparison with threshold s**).
 -/
 
 -- ============================================================
--- Definitions (self-contained for Aristotle)
+-- Definitions (self-contained)
 -- ============================================================
 
 structure Mechanism where
@@ -41,7 +41,7 @@ structure Mechanism where
 def Welfare (M : Mechanism) (s lam kap D R : ℝ) : ℝ :=
   M.m D R * s - lam * D * M.tau D R - kap * R * M.tauR D R
 
-/-- Aggregate waiting-cost change at equilibrium: Δ_wait (Eq. 29 in v11). -/
+/-- Aggregate waiting-cost change at equilibrium: Δ_wait. -/
 def Delta_wait (DA FP : Mechanism) (lam kap D1 R1 D2 R2 : ℝ) : ℝ :=
   lam * (D1 * DA.tau D1 R1 - D2 * FP.tau D2 R2) +
   kap * (R1 * DA.tauR D1 R1 - R2 * FP.tauR D2 R2)
@@ -61,15 +61,9 @@ theorem welfare_fixed_thickness
     M.m D R * s - lam * D * M.tau D R - kap * R * M.tauR D R := by
   rfl
 
-/-
-PROBLEM
-Corollary 7 (Conditions for welfare dominance, `cor:welfare-dominance`):
+/-- Corollary 7 (Conditions for welfare dominance, `cor:welfare-dominance`):
     If Dutch weakly increases volume and weakly reduces both waiting times,
-    then W_DA ≥ W_FP for any s ≥ 0.
-
-PROVIDED SOLUTION
-Unfold Welfare. Need m_DA·s - λ·D·τ_DA - κ·R·τR_DA ≥ m_FP·s - λ·D·τ_FP - κ·R·τR_FP. Rearrange: (m_DA - m_FP)·s + λ·D·(τ_FP - τ_DA) + κ·R·(τR_FP - τR_DA) ≥ 0. Each term is nonneg: (m_DA - m_FP) ≥ 0 and s ≥ 0; λ ≥ 0, D ≥ 0, τ_FP - τ_DA ≥ 0; κ ≥ 0, R ≥ 0, τR_FP - τR_DA ≥ 0. Use nlinarith.
--/
+    then `W_DA ≥ W_FP` for any `s ≥ 0`. -/
 theorem welfare_dominance_conditions
     (DA FP : Mechanism) (s lam kap D R : ℝ)
     (hs : s ≥ 0) (hlam : lam ≥ 0) (hkap : kap ≥ 0)
@@ -84,14 +78,9 @@ theorem welfare_dominance_conditions
   unfold Welfare;
   nlinarith [ mul_nonneg hlam hD, mul_nonneg hkap hR ]
 
-/-
-PROBLEM
-Proposition 15 (Welfare dominance vs. batch, `prop:welfare-batch`):
-    Under acceptance-rate matching, W_DA > W_FPb for any λ,κ > 0, s ≥ 0.
-
-PROVIDED SOLUTION
-Unfold Welfare. With hm_eq (volumes equal), the difference is: λ·D·(τ_FPb - τ_DA) + κ·R·(τR_FPb - τR_DA). Both terms are strictly positive: λ > 0, D > 0, τ_FPb > τ_DA; κ > 0, R > 0, τR_FPb > τR_DA. Use nlinarith.
--/
+/-- Proposition 15 (Welfare dominance vs. batch, `prop:welfare-batch`):
+    Under acceptance-rate matching, `W_DA > W_FPb` for any
+    `λ, κ > 0` and `s ≥ 0`. -/
 theorem welfare_vs_batch
     (DA FPb : Mechanism) (s lam kap D R : ℝ)
     (hs : s ≥ 0) (hlam : lam > 0) (hkap : kap > 0)
@@ -104,15 +93,9 @@ theorem welfare_vs_batch
     Welfare DA s lam kap D R > Welfare FPb s lam kap D R := by
   unfold Welfare; nlinarith [ mul_pos hlam hD, mul_pos hlam hR, mul_pos hkap hD, mul_pos hkap hR ] ;
 
-/-
-PROBLEM
-Proposition 16 (Welfare vs. immediate: threshold, `prop:welfare-imm`):
-    If m_DA ≥ m_FPi, dominance holds for all s ≥ 0.
-    If m_DA < m_FPi, dominance requires s ≤ s*.
-
-PROVIDED SOLUTION
-Unfold Welfare. Need m_DA·s - λ·D·τ_DA - κ·R·τR_DA ≥ m_FPi·s - λ·D·τ_FPi - κ·R·τR_FPi. Rearrange: (m_DA - m_FPi)·s + λ·D·(τ_FPi - τ_DA) + κ·R·(τR_FPi - τR_DA) ≥ 0. Each term nonneg: hm gives m_DA ≥ m_FPi, hs gives s ≥ 0, hlam/hD/htau give λ·D·(τ_FPi-τ_DA) ≥ 0, hkap/hR/htauR give κ·R·(τR_FPi-τR_DA) ≥ 0. nlinarith.
--/
+/-- Proposition 16 (Welfare vs. immediate: threshold, `prop:welfare-imm`):
+    If `m_DA ≥ m_FPi`, dominance holds for all `s ≥ 0`.
+    If `m_DA < m_FPi`, dominance requires `s ≤ s*`. -/
 theorem welfare_vs_immediate
     (DA FPi : Mechanism) (s lam kap D R : ℝ)
     (hs : s ≥ 0) (hlam : lam ≥ 0) (hkap : kap ≥ 0)
@@ -126,20 +109,14 @@ theorem welfare_vs_immediate
   unfold Welfare;
   nlinarith [ mul_nonneg hlam hD, mul_nonneg hkap hR ]
 
-/-
-PROBLEM
-Proposition 17 (Equilibrium welfare comparison, `prop:welfare-eq`):
-    The reformulated result from the Phase 1 audit (fix C1).
-    Dutch equilibrium welfare dominance holds iff
-    (m_DA - m_FP) · s ≥ Δ_wait.
+/-- Proposition 17 (Equilibrium welfare comparison, `prop:welfare-eq`),
+    case (a): when `Δ_wait ≤ 0`, dominance `W_DA ≥ W_FP` holds for all
+    `s ≥ 0`. Cases (b) and (c) follow below.
 
-    Case (a): Δ_wait ≤ 0 → dominance for all s ≥ 0.
-    Case (b): Δ_wait > 0, volume gain strict → threshold s**.
-    Case (c): Δ_wait > 0, volume gain zero → fails.
-
-PROVIDED SOLUTION
-Unfold Welfare and Delta_wait. W_DA - W_FP = (m_DA - m_FP)·s - Δ_wait. By hvol, m_DA ≥ m_FP so (m_DA - m_FP)·s ≥ 0 (since s ≥ 0). By hdelta, Δ_wait ≤ 0 so -Δ_wait ≥ 0. Sum is ≥ 0. nlinarith.
--/
+    The full statement: Dutch equilibrium welfare dominance holds iff
+    `(m_DA − m_FP) · s ≥ Δ_wait`. Case (b) is `Δ_wait > 0` with strict
+    volume gain (threshold `s**`); case (c) is `Δ_wait > 0` with zero
+    volume gain (dominance fails). -/
 theorem equilibrium_welfare_case_a
     (DA FP : Mechanism) (s lam kap : ℝ)
     (D_star_DA R_star_DA D_star_FP R_star_FP : ℝ)
@@ -154,10 +131,9 @@ theorem equilibrium_welfare_case_a
   unfold Delta_wait Welfare at *;
   nlinarith
 
-/-
-PROVIDED SOLUTION
-Unfold Welfare and Delta_wait. W_DA - W_FP = (m_DA - m_FP)·s - Δ_wait. Let Δm = m_DA - m_FP > 0 (by hvol_strict). The hypothesis hs_ge says s ≥ Δ_wait/Δm, i.e., s·Δm ≥ Δ_wait, i.e., (m_DA - m_FP)·s ≥ Δ_wait. So W_DA - W_FP ≥ 0. Use div_le_iff (with Δm > 0) to convert hs_ge, then nlinarith.
--/
+/-- Proposition 17 case (b): when `Δ_wait > 0` and the volume gain is
+    strict (`m_DA > m_FP`), dominance holds for `s ≥ s** := Δ_wait /
+    (m_DA − m_FP)`. -/
 theorem equilibrium_welfare_case_b
     (DA FP : Mechanism) (s lam kap : ℝ)
     (D_star_DA R_star_DA D_star_FP R_star_FP : ℝ)
@@ -175,13 +151,7 @@ theorem equilibrium_welfare_case_b
   unfold Delta_wait Welfare at *;
   rw [ ge_iff_le, div_le_iff₀ ] at hs_ge <;> linarith
 
-/-
-PROBLEM
-The welfare difference decomposes as volume gain minus Δ_wait.
-
-PROVIDED SOLUTION
-Unfold Welfare and Delta_wait. Both sides expand to the same expression. Use ring or simp [Welfare, Delta_wait] and ring.
--/
+/-- The welfare difference decomposes as volume gain minus `Δ_wait`. -/
 theorem welfare_difference_decomposition
     (DA FP : Mechanism) (s lam kap : ℝ)
     (D1 R1 D2 R2 : ℝ) :
@@ -190,11 +160,9 @@ theorem welfare_difference_decomposition
     Delta_wait DA FP lam kap D1 R1 D2 R2 := by
   unfold Welfare Delta_wait; ring;
 
-/-
-Proposition `prop:welfare`(b)/(d) (Fixed-thickness welfare iff, v17 line 2220):
-    At fixed thickness, W_DA ≥ W_FP iff
-    (m_DA − m_FP)·s ≥ λ·D·(τ_DA − τ_FP) + κ·R·(τR_DA − τR_FP).
--/
+/-- Proposition `prop:welfare` (b)/(d) (Fixed-thickness welfare iff):
+    At fixed thickness, `W_DA ≥ W_FP` iff
+    `(m_DA − m_FP) · s ≥ λ · D · (τ_DA − τ_FP) + κ · R · (τR_DA − τR_FP)`. -/
 theorem welfare_fixed_thickness_iff
     (DA FP : Mechanism) (s lam kap D R : ℝ) :
     Welfare DA s lam kap D R ≥ Welfare FP s lam kap D R ↔
@@ -203,12 +171,10 @@ theorem welfare_fixed_thickness_iff
     kap * R * (DA.tauR D R - FP.tauR D R) := by
   constructor <;> intro h <;> unfold Welfare at * <;> linarith
 
-/-
-Proposition `prop:welfare`(d) (Volume-reversal welfare threshold, v17 line 2220):
-    When m_DA < m_FPi at fixed thickness but Dutch has timing advantage,
-    W_DA ≥ W_FPi iff s ≤ s* where
-    s* = [λ·D·(τ_FPi − τ_DA) + κ·R·(τR_FPi − τR_DA)] / (m_FPi − m_DA).
--/
+/-- Proposition `prop:welfare` (d) (Volume-reversal welfare threshold):
+    When `m_DA < m_FPi` at fixed thickness but Dutch has a timing advantage,
+    `W_DA ≥ W_FPi` iff `s ≤ s*` where
+    `s* = [λ · D · (τ_FPi − τ_DA) + κ · R · (τR_FPi − τR_DA)] / (m_FPi − m_DA)`. -/
 theorem welfare_vs_immediate_volume_reversal
     (DA FPi : Mechanism) (s lam kap D R : ℝ)
     (hs : s ≥ 0) (hlam : lam ≥ 0) (hkap : kap ≥ 0)
@@ -225,11 +191,9 @@ theorem welfare_vs_immediate_volume_reversal
   rw [ le_div_iff₀ ( sub_pos.2 hvol_rev ) ];
   constructor <;> intro h <;> unfold Welfare at * <;> linarith
 
-/-
-Proposition `prop:welfare-eq` case (b) full iff (v17 line 2305):
-    When Δ_wait > 0 and volume gain is strict (m_DA > m_FP),
-    W_DA ≥ W_FP if and only if s ≥ s** := Δ_wait / (m_DA − m_FP).
--/
+/-- Proposition `prop:welfare-eq` case (b), full iff:
+    When `Δ_wait > 0` and the volume gain is strict (`m_DA > m_FP`),
+    `W_DA ≥ W_FP` iff `s ≥ s** := Δ_wait / (m_DA − m_FP)`. -/
 theorem equilibrium_welfare_case_b_iff
     (DA FP : Mechanism) (s lam kap : ℝ)
     (D_star_DA R_star_DA D_star_FP R_star_FP : ℝ)
@@ -244,11 +208,9 @@ theorem equilibrium_welfare_case_b_iff
         (DA.m D_star_DA R_star_DA - FP.m D_star_FP R_star_FP) := by
   constructor <;> intro <;> rw [ ge_iff_le ] at * <;> rw [ div_le_iff₀ ( by linarith ) ] at * <;> nlinarith [ WelfareAnalysis.welfare_difference_decomposition DA FP s lam kap D_star_DA R_star_DA D_star_FP R_star_FP ]
 
-/-
-Proposition `prop:welfare-eq` case (c) (v17 line 2305):
-    If Δ_wait > 0 and the volume gain is zero (m_DA = m_FP at equilibrium),
-    then W_DA < W_FP for all s ≥ 0. Dominance fails.
--/
+/-- Proposition `prop:welfare-eq` case (c):
+    If `Δ_wait > 0` and the volume gain is zero (`m_DA = m_FP` at
+    equilibrium), then `W_DA < W_FP` for all `s ≥ 0`; dominance fails. -/
 theorem equilibrium_welfare_case_c
     (DA FP : Mechanism) (s lam kap : ℝ)
     (D_star_DA R_star_DA D_star_FP R_star_FP : ℝ)
