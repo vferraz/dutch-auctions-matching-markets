@@ -35,6 +35,8 @@ function generateEvents(p, seed) {
 
 const C = window.PALETTE;
 const fmt = window.fmt;
+const THEATER_PLOT_PAD_L = 140;
+const THEATER_PLOT_PAD_R = 100;
 
 // Determine acceptance for one event under one mechanism at time tNow.
 // Returns: {state: "future"|"rejected"|"pending"|"accepted", matchTime}
@@ -53,7 +55,7 @@ function resolveEvent(mech, ev, p, tNow) {
 
 function Lane({ mech, label, color, p, events, tNow, height }) {
   const W = 1280, H = height;
-  const padL = 100, padR = 100, padT = 18, padB = 22;
+  const padL = THEATER_PLOT_PAD_L, padR = THEATER_PLOT_PAD_R, padT = 18, padB = 22;
   const x = v => padL + (v / p.T) * (W - padL - padR);
   const y = v => H - padB - v * (H - padT - padB);
 
@@ -307,7 +309,7 @@ function Theater({ p, M }) {
           <g>
             {Array.from({ length: 7 }, (_, i) => (
               <g key={i}>
-                <text x={100 + (i / 6) * (W - 200)}
+                <text x={THEATER_PLOT_PAD_L + (i / 6) * (W - THEATER_PLOT_PAD_L - THEATER_PLOT_PAD_R)}
                       y={tAxisY}
                       fontSize="9.5"
                       fontFamily="Inter, sans-serif"
